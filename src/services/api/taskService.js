@@ -39,13 +39,14 @@ export const taskService = {
     return tasks.find(task => task.id === id) || null;
   },
 
-  async create(taskData) {
+async create(taskData) {
     await delay(300);
     const tasks = loadTasks();
     const newTask = {
       id: generateId(),
       title: taskData.title.trim(),
       description: taskData.description ? taskData.description.trim() : "",
+      dueDate: taskData.dueDate || null,
       completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -63,7 +64,7 @@ export const taskService = {
       throw new Error("Task not found");
     }
     
-    const updatedTask = {
+const updatedTask = {
       ...tasks[taskIndex],
       ...updateData,
       id: id, // Ensure ID cannot be changed

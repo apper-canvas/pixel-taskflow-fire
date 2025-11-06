@@ -13,8 +13,9 @@ const TaskItem = ({ task, onToggleComplete, onDelete, onUpdate, className, ...pr
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [editTitle, setEditTitle] = useState(task.title);
+const [editTitle, setEditTitle] = useState(task.title);
   const [editDescription, setEditDescription] = useState(task.description || "");
+  const [editDueDate, setEditDueDate] = useState(task.dueDate || "");
   const handleToggleComplete = async () => {
     setIsUpdating(true);
     try {
@@ -40,9 +41,12 @@ const TaskItem = ({ task, onToggleComplete, onDelete, onUpdate, className, ...pr
   };
 
 const handleUpdateTask = async (field, value) => {
-    try {
+try {
       const updateData = { [field]: value };
       await onUpdate(task.id, updateData);
+      if (field === 'dueDate') {
+        setEditDueDate(value);
+      }
       toast.success("Task updated successfully");
     } catch (error) {
       toast.error("Failed to update task");
@@ -77,8 +81,7 @@ const handleUpdateTask = async (field, value) => {
     setEditDescription(task.description || "");
     setIsEditingDescription(false);
   };
-
-  const formatDate = (dateString) => {
+const formatDate = (dateString) => {
     try {
       return format(new Date(dateString), "MMM d, yyyy 'at' h:mm a");
     } catch (error) {
@@ -86,12 +89,29 @@ const handleUpdateTask = async (field, value) => {
     }
   };
 
+  const formatDueDate = (dateString) => {
+    try {
+      return format(new Date(dateString), "MMM d, yyyy");
+    } catch (error) {
+      return "Invalid date";
+    }
+  };
+
+  const isOverdue = (dueDate) => {
+    if (!dueDate) return false;
+    const due = new Date(dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return due < today && !task.completed;
+  };
+
   return (
     <>
       <div 
-        className={cn(
+className={cn(
           "bg-white rounded-xl p-6 shadow-subtle border border-gray-100 task-card transition-all duration-200",
           task.completed && "opacity-60",
+          isOverdue(task.dueDate) && "border-red-200 bg-red-50",
           className
         )} 
         {...props}
@@ -203,6 +223,24 @@ const handleUpdateTask = async (field, value) => {
                 title="Click to edit"
               >
                 {task.description || "Click to add description..."}
+              </div>
+)}
+            
+            {task.dueDate && (
+              <div className={cn(
+                "flex items-center mt-3 text-sm",
+                isOverdue(task.dueDate) ? "text-red-600" : "text-gray-600"
+              )}>
+                <ApperIcon 
+                  name={isOverdue(task.dueDate) ? "AlertTriangle" : "Calendar"} 
+                  className="h-4 w-4 mr-2" 
+                />
+                <span>Due {formatDueDate(task.dueDate)}</span>
+                {isOverdue(task.dueDate) && (
+                  <span className="ml-2 text-xs font-medium px-2 py-1 bg-red-100 text-red-700 rounded-full">
+                    Overdue
+                  </span>
+                )}
               </div>
             )}
             

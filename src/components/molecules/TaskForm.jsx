@@ -7,9 +7,10 @@ import Textarea from "@/components/atoms/Textarea";
 import { cn } from "@/utils/cn";
 
 const TaskForm = ({ onTaskCreated, className, ...props }) => {
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     title: "",
-    description: ""
+    description: "",
+    dueDate: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -29,7 +30,7 @@ const TaskForm = ({ onTaskCreated, className, ...props }) => {
     }
   };
 
-  const validateForm = () => {
+const validateForm = () => {
     const newErrors = {};
     
     if (!formData.title.trim()) {
@@ -42,6 +43,16 @@ const TaskForm = ({ onTaskCreated, className, ...props }) => {
     
     if (formData.description.trim().length > 500) {
       newErrors.description = "Description must be less than 500 characters";
+    }
+
+    if (formData.dueDate) {
+      const selectedDate = new Date(formData.dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (selectedDate < today) {
+        newErrors.dueDate = "Due date cannot be in the past";
+      }
     }
     
     setErrors(newErrors);
@@ -62,9 +73,10 @@ const TaskForm = ({ onTaskCreated, className, ...props }) => {
       await onTaskCreated(formData);
       
       // Reset form
-      setFormData({
+setFormData({
         title: "",
-        description: ""
+        description: "",
+        dueDate: ""
       });
       
       toast.success("Task created successfully!");
@@ -124,6 +136,28 @@ const TaskForm = ({ onTaskCreated, className, ...props }) => {
             <ApperIcon name="AlertCircle" className="h-4 w-4 mr-1" />
             {errors.description}
           </p>
+        )}
+</div>
+
+      <div className="space-y-2">
+        <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">
+          Due Date (Optional)
+        </label>
+        <Input
+          id="dueDate"
+          type="date"
+          value={formData.dueDate}
+          onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+          className={cn(
+            "transition-all duration-200",
+            errors.dueDate && "border-red-300 focus:border-red-500 focus:ring-red-200"
+          )}
+        />
+        {errors.dueDate && (
+          <div className="flex items-center text-red-600 text-sm mt-1">
+            <ApperIcon name="AlertCircle" className="h-4 w-4 mr-1" />
+            {errors.dueDate}
+          </div>
         )}
       </div>
 
