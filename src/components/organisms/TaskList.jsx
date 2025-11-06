@@ -60,6 +60,22 @@ const TaskList = ({ refreshTrigger, onTasksChange, className, ...props }) => {
     }
   };
 
+const handleUpdateTask = async (taskId, updateData) => {
+    try {
+      const updatedTask = await taskService.update(taskId, updateData);
+      setTasks(prevTasks => {
+        const newTasks = prevTasks.map(task => 
+          task.id === taskId ? updatedTask : task
+        );
+        onTasksChange?.(newTasks);
+        return newTasks;
+      });
+      return updatedTask;
+    } catch (err) {
+      throw err;
+    }
+  };
+
   const handleDeleteTask = async (taskId) => {
     try {
       await taskService.delete(taskId);
@@ -102,12 +118,13 @@ const TaskList = ({ refreshTrigger, onTasksChange, className, ...props }) => {
 
   return (
     <div className={cn("space-y-4 task-list", className)} {...props}>
-      {tasks.map((task) => (
+{tasks.map((task) => (
         <TaskItem
           key={task.id}
           task={task}
           onToggleComplete={handleToggleComplete}
           onDelete={handleDeleteTask}
+          onUpdate={handleUpdateTask}
         />
       ))}
     </div>

@@ -66,6 +66,7 @@ export const taskService = {
     const updatedTask = {
       ...tasks[taskIndex],
       ...updateData,
+      id: id, // Ensure ID cannot be changed
       updatedAt: new Date().toISOString()
     };
     

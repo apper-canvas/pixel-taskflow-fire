@@ -4,12 +4,17 @@ import { toast } from "react-toastify";
 import ApperIcon from "@/components/ApperIcon";
 import Button from "@/components/atoms/Button";
 import Checkbox from "@/components/atoms/Checkbox";
+import Input from "@/components/atoms/Input";
+import Textarea from "@/components/atoms/Textarea";
 import { cn } from "@/utils/cn";
 
-const TaskItem = ({ task, onToggleComplete, onDelete, className, ...props }) => {
+const TaskItem = ({ task, onToggleComplete, onDelete, onUpdate, className, ...props }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editTitle, setEditTitle] = useState(task.title);
+  const [editDescription, setEditDescription] = useState(task.description || "");
   const handleToggleComplete = async () => {
     setIsUpdating(true);
     try {
@@ -32,6 +37,45 @@ const TaskItem = ({ task, onToggleComplete, onDelete, className, ...props }) => 
       toast.error("Failed to delete task");
       console.error("Error deleting task:", error);
     }
+  };
+
+const handleUpdateTask = async (field, value) => {
+    try {
+      const updateData = { [field]: value };
+      await onUpdate(task.id, updateData);
+      toast.success("Task updated successfully");
+    } catch (error) {
+      toast.error("Failed to update task");
+      console.error("Error updating task:", error);
+    }
+  };
+
+  const handleSaveTitle = async () => {
+    if (editTitle.trim() === "") {
+      toast.error("Title cannot be empty");
+      return;
+    }
+    if (editTitle !== task.title) {
+      await handleUpdateTask("title", editTitle.trim());
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleSaveDescription = async () => {
+    if (editDescription !== task.description) {
+      await handleUpdateTask("description", editDescription.trim());
+    }
+    setIsEditingDescription(false);
+  };
+
+  const handleCancelTitle = () => {
+    setEditTitle(task.title);
+    setIsEditingTitle(false);
+  };
+
+  const handleCancelDescription = () => {
+    setEditDescription(task.description || "");
+    setIsEditingDescription(false);
   };
 
   const formatDate = (dateString) => {
@@ -66,22 +110,100 @@ const TaskItem = ({ task, onToggleComplete, onDelete, className, ...props }) => 
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 
-              className={cn(
-                "font-semibold text-gray-900 text-lg leading-tight",
-                task.completed && "task-title-completed text-gray-500"
-              )}
-            >
-              {task.title}
-            </h3>
-            
-            {task.description && (
-              <p className={cn(
-                "text-gray-600 mt-2 text-sm leading-relaxed",
-                task.completed && "text-gray-400"
-              )}>
-                {task.description}
-              </p>
+{isEditingTitle ? (
+              <div className="space-y-2">
+                <Input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="font-semibold text-lg"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSaveTitle();
+                    } else if (e.key === 'Escape') {
+                      handleCancelTitle();
+                    }
+                  }}
+                  autoFocus
+                />
+                <div className="flex space-x-2">
+                  <Button
+                    size="sm"
+                    onClick={handleSaveTitle}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <ApperIcon name="Check" className="h-3 w-3 mr-1" />
+                    Save
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancelTitle}
+                  >
+                    <ApperIcon name="X" className="h-3 w-3 mr-1" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <h3 
+                className={cn(
+                  "font-semibold text-gray-900 text-lg leading-tight cursor-pointer hover:text-blue-600 transition-colors",
+                  task.completed && "task-title-completed text-gray-500"
+                )}
+                onClick={() => setIsEditingTitle(true)}
+                title="Click to edit"
+              >
+                {task.title}
+              </h3>
+            )}
+{isEditingDescription ? (
+              <div className="space-y-2 mt-2">
+                <Textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="text-sm resize-none"
+                  rows={3}
+                  placeholder="Add description..."
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                      handleSaveDescription();
+                    } else if (e.key === 'Escape') {
+                      handleCancelDescription();
+                    }
+                  }}
+                  autoFocus
+                />
+                <div className="flex space-x-2">
+                  <Button
+                    size="sm"
+                    onClick={handleSaveDescription}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <ApperIcon name="Check" className="h-3 w-3 mr-1" />
+                    Save
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancelDescription}
+                  >
+                    <ApperIcon name="X" className="h-3 w-3 mr-1" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className={cn(
+                  "text-gray-600 mt-2 text-sm leading-relaxed cursor-pointer hover:text-blue-600 transition-colors min-h-[1.25rem]",
+                  task.completed && "text-gray-400",
+                  !task.description && "text-gray-400 italic"
+                )}
+                onClick={() => setIsEditingDescription(true)}
+                title="Click to edit"
+              >
+                {task.description || "Click to add description..."}
+              </div>
             )}
             
             <div className="flex items-center mt-3 text-xs text-gray-400">
