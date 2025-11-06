@@ -1,19 +1,22 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { taskService } from "@/services/api/taskService";
+import { cn } from "@/lib/utils";
 import ApperIcon from "@/components/ApperIcon";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
-import TaskForm from "@/components/molecules/TaskForm";
-import TaskCounter from "@/components/molecules/TaskCounter";
 import TaskList from "@/components/organisms/TaskList";
+import TaskCounter from "@/components/molecules/TaskCounter";
+import TaskForm from "@/components/molecules/TaskForm";
 
 const TaskManager = () => {
-const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [activeStatusFilter, setActiveStatusFilter] = useState("all");
   const [activePriorityFilter, setActivePriorityFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Debounce search query for performance
@@ -39,8 +42,8 @@ const [tasks, setTasks] = useState([]);
 setTasks(updatedTasks);
   };
 
-  const getFilteredTasks = () => {
-return tasks.filter(task => {
+const getFilteredTasks = () => {
+    const filtered = tasks.filter(task => {
       // Status filter
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -82,14 +85,69 @@ return tasks.filter(task => {
 
       return statusMatch && priorityMatch && searchMatch;
     });
+
+    // Apply sorting
+    const sorted = [...filtered].sort((a, b) => {
+      // Always keep completed tasks at bottom within their sort group
+      if (a.completed !== b.completed) {
+        return a.completed ? 1 : -1;
+      }
+
+      switch (sortBy) {
+        case "dueDate":
+          // Handle null due dates - put them at the end
+          if (!a.dueDate && !b.dueDate) return 0;
+          if (!a.dueDate) return 1;
+          if (!b.dueDate) return -1;
+          return new Date(a.dueDate) - new Date(b.dueDate);
+        
+        case "priority":
+          const priorityOrder = { high: 3, medium: 2, low: 1 };
+          const aPriority = priorityOrder[a.priority] || 0;
+          const bPriority = priorityOrder[b.priority] || 0;
+          if (aPriority !== bPriority) {
+            return bPriority - aPriority; // High to low
+          }
+          // Secondary sort by creation date if same priority
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        
+        case "alphabetical":
+          return a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+        
+        case "createdAt":
+        default:
+          return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+    });
+
+    return sorted;
   };
 
-  const handleStatusFilterChange = (filter) => {
+const handleStatusFilterChange = (filter) => {
     setActiveStatusFilter(filter);
   };
 
   const handlePriorityFilterChange = (filter) => {
     setActivePriorityFilter(filter);
+  };
+
+  const handleSortChange = (sort) => {
+    setSortBy(sort);
+};
+
+  const getSortLabel = (sortValue) => {
+    switch (sortValue) {
+      case "createdAt":
+        return "Recently Created";
+      case "dueDate":
+        return "Due Date";
+      case "priority":
+        return "Priority";
+      case "alphabetical":
+        return "Alphabetically";
+      default:
+        return "Recently Created";
+    }
   };
 
   return (
@@ -258,6 +316,54 @@ return tasks.filter(task => {
                 </Button>
               </div>
             </div>
+</div>
+
+          {/* Sort Dropdown */}
+          <div className="relative">
+            <Button
+              variant="outline"
+              onClick={() => setShowSortDropdown(!showSortDropdown)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+            >
+              <ApperIcon name="ArrowUpDown" size={16} />
+              Sort: {getSortLabel(sortBy)}
+              <ApperIcon 
+                name={showSortDropdown ? "ChevronUp" : "ChevronDown"} 
+                size={16} 
+                className="text-gray-500"
+              />
+            </Button>
+            
+            {showSortDropdown && (
+              <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                <div className="py-2">
+                  {[
+                    { value: "createdAt", label: "Recently Created", icon: "Clock" },
+                    { value: "dueDate", label: "Due Date", icon: "Calendar" },
+                    { value: "priority", label: "Priority", icon: "Flag" },
+                    { value: "alphabetical", label: "Alphabetically", icon: "SortAsc" }
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        handleSortChange(option.value);
+                        setShowSortDropdown(false);
+                      }}
+                      className={cn(
+                        "w-full px-4 py-2 text-left text-sm flex items-center gap-3 hover:bg-gray-50 transition-colors",
+                        sortBy === option.value ? "bg-accent/10 text-accent font-medium" : "text-gray-700"
+                      )}
+                    >
+                      <ApperIcon name={option.icon} size={16} />
+                      {option.label}
+                      {sortBy === option.value && (
+                        <ApperIcon name="Check" size={16} className="ml-auto" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -284,6 +390,7 @@ return tasks.filter(task => {
             activeStatusFilter={activeStatusFilter}
             activePriorityFilter={activePriorityFilter}
             searchQuery={debouncedSearchQuery}
+            sortBy={sortBy}
           />
         </div>
 

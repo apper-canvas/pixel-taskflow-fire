@@ -6,9 +6,20 @@ import TaskItem from "@/components/molecules/TaskItem";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import Loading from "@/components/ui/Loading";
+
+// Helper function to get sort display label
+const getSortLabel = (sortBy) => {
+  switch (sortBy) {
+    case "dueDate": return "Due Date";
+    case "priority": return "Priority";
+    case "alphabetical": return "A-Z";
+    case "createdAt": 
+    default: return "Recent";
+  }
+};
 import { cn } from "@/utils/cn";
 
-const TaskList = ({ refreshTrigger, onTasksChange, filteredTasks, activeStatusFilter, activePriorityFilter, searchQuery, className, ...props }) => {
+const TaskList = ({ refreshTrigger, onTasksChange, filteredTasks, activeStatusFilter, activePriorityFilter, searchQuery, sortBy, className, ...props }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -19,13 +30,8 @@ const loadTasks = async () => {
       setError("");
       const fetchedTasks = await taskService.getAll();
       // Sort tasks: incomplete first, then completed, with newest first within each group
-      const sortedTasks = fetchedTasks.sort((a, b) => {
-        if (a.completed !== b.completed) {
-          return a.completed ? 1 : -1;
-        }
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      });
-      setTasks(sortedTasks);
+// No longer sort here - sorting is handled by parent component
+      setTasks(fetchedTasks);
       onTasksChange?.(sortedTasks);
     } catch (err) {
       setError("Failed to load tasks. Please try again.");
@@ -46,13 +52,8 @@ const loadTasks = async () => {
         const newTasks = prevTasks.map(task => 
           task.id === taskId ? updatedTask : task
 );
-        // Re-sort after toggle
-        const sortedTasks = newTasks.sort((a, b) => {
-          if (a.completed !== b.completed) {
-            return a.completed ? 1 : -1;
-          }
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        });
+// No longer sort here - sorting is handled by parent component
+        const sortedTasks = newTasks;
         onTasksChange?.(sortedTasks);
         return sortedTasks;
       });
