@@ -157,6 +157,16 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.2);
 }
 
+/* Priority badge animations */
+.priority-badge {
+  transition: all 0.2s ease;
+}
+
+.priority-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Modal backdrop */
 .modal-backdrop {
   backdrop-filter: blur(4px);

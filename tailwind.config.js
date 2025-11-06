@@ -16,9 +16,14 @@ export default {
         surface: '#FFFFFF',
         background: '#F7FAFC',
         success: '#48BB78',
-        warning: '#F6AD55',
+warning: '#F6AD55',
         error: '#FC8181',
         info: '#63B3ED',
+        priority: {
+          high: '#FEE2E2',
+          medium: '#FEF3C7', 
+          low: '#D1FAE5'
+        },
       },
       boxShadow: {
         'subtle': '0 2px 4px rgba(0, 0, 0, 0.05)',

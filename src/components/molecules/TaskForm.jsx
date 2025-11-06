@@ -10,12 +10,13 @@ const TaskForm = ({ onTaskCreated, className, ...props }) => {
 const [formData, setFormData] = useState({
     title: "",
     description: "",
-    dueDate: ""
+    dueDate: "",
+    priority: "Medium"
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const handleInputChange = (field, value) => {
+const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -76,7 +77,8 @@ const validateForm = () => {
 setFormData({
         title: "",
         description: "",
-        dueDate: ""
+        dueDate: "",
+        priority: "Medium"
       });
       
       toast.success("Task created successfully!");
@@ -138,6 +140,30 @@ setFormData({
           </p>
         )}
 </div>
+<div className="space-y-2">
+        <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
+          Priority
+        </label>
+        <select
+          id="priority"
+          value={formData.priority}
+          onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
+          className={cn(
+            "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 bg-white",
+            errors.priority && "border-red-300 focus:border-red-500 focus:ring-red-200"
+          )}
+        >
+          <option value="Low">Low Priority</option>
+          <option value="Medium">Medium Priority</option>
+          <option value="High">High Priority</option>
+        </select>
+        {errors.priority && (
+          <div className="flex items-center text-red-600 text-sm mt-1">
+            <ApperIcon name="AlertCircle" className="h-4 w-4 mr-1" />
+            {errors.priority}
+          </div>
+        )}
+      </div>
 
       <div className="space-y-2">
         <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">

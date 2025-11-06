@@ -41,7 +41,7 @@ const [editTitle, setEditTitle] = useState(task.title);
   };
 
 const handleUpdateTask = async (field, value) => {
-try {
+    try {
       const updateData = { [field]: value };
       await onUpdate(task.id, updateData);
       if (field === 'dueDate') {
@@ -51,6 +51,15 @@ try {
     } catch (error) {
       toast.error("Failed to update task");
       console.error("Error updating task:", error);
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'High': return 'bg-red-100 text-red-800 border-red-200';
+      case 'Medium': return 'bg-amber-100 text-amber-800 border-amber-200';
+      case 'Low': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -105,15 +114,15 @@ const formatDate = (dateString) => {
     return due < today && !task.completed;
   };
 
-  return (
+return (
     <>
       <div 
-className={cn(
+        className={cn(
           "bg-white rounded-xl p-6 shadow-subtle border border-gray-100 task-card transition-all duration-200",
           task.completed && "opacity-60",
           isOverdue(task.dueDate) && "border-red-200 bg-red-50",
           className
-        )} 
+        )}
         {...props}
       >
         <div className="flex items-start space-x-4">
@@ -129,54 +138,75 @@ className={cn(
             />
           </div>
 
-          <div className="flex-1 min-w-0">
-{isEditingTitle ? (
-              <div className="space-y-2">
-                <Input
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="font-semibold text-lg"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSaveTitle();
-                    } else if (e.key === 'Escape') {
-                      handleCancelTitle();
-                    }
-                  }}
-                  autoFocus
-                />
-                <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    onClick={handleSaveTitle}
-                    className="bg-green-600 hover:bg-green-700 text-white"
+<div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex-1">
+                {isEditingTitle ? (
+                  <div className="space-y-2">
+                    <Input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="font-semibold text-lg"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSaveTitle();
+                        } else if (e.key === 'Escape') {
+                          handleCancelTitle();
+                        }
+                      }}
+                      autoFocus
+                    />
+                    <div className="flex space-x-2">
+                      <Button
+                        size="sm"
+                        onClick={handleSaveTitle}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <ApperIcon name="Check" className="h-3 w-3 mr-1" />
+                        Save
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCancelTitle}
+                      >
+                        <ApperIcon name="X" className="h-3 w-3 mr-1" />
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <h3 
+                    className={cn(
+                      "font-semibold text-gray-900 text-lg leading-tight cursor-pointer hover:text-blue-600 transition-colors",
+                      task.completed && "task-title-completed text-gray-500"
+                    )}
+                    onClick={() => setIsEditingTitle(true)}
+                    title="Click to edit"
                   >
-                    <ApperIcon name="Check" className="h-3 w-3 mr-1" />
-                    Save
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCancelTitle}
-                  >
-                    <ApperIcon name="X" className="h-3 w-3 mr-1" />
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <h3 
-                className={cn(
-                  "font-semibold text-gray-900 text-lg leading-tight cursor-pointer hover:text-blue-600 transition-colors",
-                  task.completed && "task-title-completed text-gray-500"
+                    {task.title}
+                  </h3>
                 )}
-                onClick={() => setIsEditingTitle(true)}
-                title="Click to edit"
-              >
-                {task.title}
-              </h3>
-            )}
-{isEditingDescription ? (
+              </div>
+              <div className="flex items-center space-x-2 ml-4">
+                <span 
+                  className={cn(
+                    "px-2 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors",
+                    getPriorityColor(task.priority || 'Medium')
+                  )}
+                  onClick={() => {
+                    const priorities = ['Low', 'Medium', 'High'];
+                    const currentIndex = priorities.indexOf(task.priority || 'Medium');
+                    const nextIndex = (currentIndex + 1) % priorities.length;
+                    handleUpdateTask('priority', priorities[nextIndex]);
+                  }}
+                  title="Click to change priority"
+                >
+                  {task.priority || 'Medium'}
+                </span>
+              </div>
+            </div>
+            {isEditingDescription ? (
               <div className="space-y-2 mt-2">
                 <Textarea
                   value={editDescription}

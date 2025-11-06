@@ -47,6 +47,7 @@ async create(taskData) {
       title: taskData.title.trim(),
       description: taskData.description ? taskData.description.trim() : "",
       dueDate: taskData.dueDate || null,
+      priority: taskData.priority || "Medium",
       completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -56,7 +57,7 @@ async create(taskData) {
     return { ...newTask };
   },
 
-  async update(id, updateData) {
+async update(id, updateData) {
     await delay(250);
     const tasks = loadTasks();
     const taskIndex = tasks.findIndex(task => task.id === id);
@@ -64,7 +65,7 @@ async create(taskData) {
       throw new Error("Task not found");
     }
     
-const updatedTask = {
+    const updatedTask = {
       ...tasks[taskIndex],
       ...updateData,
       id: id, // Ensure ID cannot be changed
