@@ -11,7 +11,8 @@ const [formData, setFormData] = useState({
     title: "",
     description: "",
     dueDate: "",
-    priority: "Medium"
+    priority: "Medium",
+    category: "Personal"
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -78,7 +79,8 @@ setFormData({
         title: "",
         description: "",
         dueDate: "",
-        priority: "Medium"
+        priority: "Medium",
+        category: "Personal"
       });
       
       toast.success("Task created successfully!");
@@ -140,29 +142,58 @@ setFormData({
           </p>
         )}
 </div>
-<div className="space-y-2">
-        <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
-          Priority
-        </label>
-        <select
-          id="priority"
-          value={formData.priority}
-          onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
-          className={cn(
-            "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 bg-white",
-            errors.priority && "border-red-300 focus:border-red-500 focus:ring-red-200"
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
+            Priority
+          </label>
+          <select
+            id="priority"
+            value={formData.priority}
+            onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
+            className={cn(
+              "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 bg-white",
+              errors.priority && "border-red-300 focus:border-red-500 focus:ring-red-200"
+            )}
+          >
+            <option value="Low">Low Priority</option>
+            <option value="Medium">Medium Priority</option>
+            <option value="High">High Priority</option>
+          </select>
+          {errors.priority && (
+            <div className="flex items-center text-red-600 text-sm mt-1">
+              <ApperIcon name="AlertCircle" className="h-4 w-4 mr-1" />
+              {errors.priority}
+            </div>
           )}
-        >
-          <option value="Low">Low Priority</option>
-          <option value="Medium">Medium Priority</option>
-          <option value="High">High Priority</option>
-        </select>
-        {errors.priority && (
-          <div className="flex items-center text-red-600 text-sm mt-1">
-            <ApperIcon name="AlertCircle" className="h-4 w-4 mr-1" />
-            {errors.priority}
-          </div>
-        )}
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+            Category
+          </label>
+          <select
+            id="category"
+            value={formData.category}
+            onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+            className={cn(
+              "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 bg-white",
+              errors.category && "border-red-300 focus:border-red-500 focus:ring-red-200"
+            )}
+          >
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Health">Health</option>
+            <option value="Finance">Finance</option>
+          </select>
+          {errors.category && (
+            <div className="flex items-center text-red-600 text-sm mt-1">
+              <ApperIcon name="AlertCircle" className="h-4 w-4 mr-1" />
+              {errors.category}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -172,7 +203,7 @@ setFormData({
         <Input
           id="dueDate"
           type="date"
-          value={formData.dueDate}
+value={formData.dueDate}
           onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
           className={cn(
             "transition-all duration-200",

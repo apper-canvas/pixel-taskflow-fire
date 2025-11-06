@@ -48,6 +48,7 @@ async create(taskData) {
       description: taskData.description ? taskData.description.trim() : "",
       dueDate: taskData.dueDate || null,
       priority: taskData.priority || "Medium",
+      category: taskData.category || "Personal",
       completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()

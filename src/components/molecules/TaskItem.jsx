@@ -11,11 +11,23 @@ import { cn } from "@/utils/cn";
 const TaskItem = ({ task, onToggleComplete, onDelete, onUpdate, className, ...props }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
+const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
-const [editTitle, setEditTitle] = useState(task.title);
+  const [editTitle, setEditTitle] = useState(task.title);
   const [editDescription, setEditDescription] = useState(task.description || "");
   const [editDueDate, setEditDueDate] = useState(task.dueDate || "");
+
+  const getCategoryColor = (category) => {
+    const colors = {
+      'Work': 'bg-blue-100 text-blue-700 border-blue-200',
+      'Personal': 'bg-green-100 text-green-700 border-green-200', 
+      'Shopping': 'bg-purple-100 text-purple-700 border-purple-200',
+      'Health': 'bg-red-100 text-red-700 border-red-200',
+      'Finance': 'bg-yellow-100 text-yellow-700 border-yellow-200'
+    };
+    return colors[category] || colors['Personal'];
+  };
+
   const handleToggleComplete = async () => {
     setIsUpdating(true);
     try {
@@ -54,6 +66,13 @@ const handleUpdateTask = async (field, value) => {
     }
   };
 
+  const handleCategoryChange = async () => {
+    const categories = ['Work', 'Personal', 'Shopping', 'Health', 'Finance'];
+    const currentIndex = categories.indexOf(task.category || 'Personal');
+    const nextIndex = (currentIndex + 1) % categories.length;
+    handleUpdateTask('category', categories[nextIndex]);
+  };
+
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'High': return 'bg-red-100 text-red-800 border-red-200';
@@ -62,8 +81,7 @@ const handleUpdateTask = async (field, value) => {
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
-
-  const handleSaveTitle = async () => {
+const handleSaveTitle = async () => {
     if (editTitle.trim() === "") {
       toast.error("Title cannot be empty");
       return;
@@ -139,6 +157,19 @@ return (
           </div>
 
 <div className="flex-1 min-w-0">
+          {/* Category Tag */}
+          <div className="flex items-center space-x-2 mb-2">
+            <span 
+              className={cn(
+                "px-2 py-1 text-xs font-medium rounded-full border cursor-pointer transition-all duration-200 hover:scale-105",
+                getCategoryColor(task.category || 'Personal')
+              )}
+              onClick={handleCategoryChange}
+              title="Click to change category"
+            >
+              {task.category || 'Personal'}
+            </span>
+          </div>
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
                 {isEditingTitle ? (
@@ -188,7 +219,7 @@ return (
                   </h3>
                 )}
               </div>
-              <div className="flex items-center space-x-2 ml-4">
+<div className="flex items-center space-x-2 ml-4">
                 <span 
                   className={cn(
                     "px-2 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors",
@@ -205,7 +236,7 @@ return (
                   {task.priority || 'Medium'}
                 </span>
               </div>
-            </div>
+</div>
             {isEditingDescription ? (
               <div className="space-y-2 mt-2">
                 <Textarea
