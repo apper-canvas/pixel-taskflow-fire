@@ -1,0 +1,163 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import 'react-toastify/dist/ReactToastify.css';
+
+/* Custom toast styling */
+.Toastify__toast {
+  font-family: 'Inter', sans-serif;
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 12px 16px;
+}
+
+.Toastify__toast--success {
+  background: linear-gradient(135deg, #48BB78, #38A169);
+  color: white;
+}
+
+.Toastify__toast--error {
+  background: linear-gradient(135deg, #FC8181, #E53E3E);
+  color: white;
+}
+
+.Toastify__toast--info {
+  background: linear-gradient(135deg, #63B3ED, #3182CE);
+  color: white;
+}
+
+.Toastify__progress-bar {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.Toastify__close-button {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Custom scrollbar */
+.task-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.task-list::-webkit-scrollbar-track {
+  background: #F7FAFC;
+}
+
+.task-list::-webkit-scrollbar-thumb {
+  background: #CBD5E0;
+  border-radius: 3px;
+}
+
+.task-list::-webkit-scrollbar-thumb:hover {
+  background: #A0AEC0;
+}
+
+/* Strikethrough animation */
+.task-title-completed {
+  position: relative;
+}
+
+.task-title-completed::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 2px;
+  background: #A0AEC0;
+  animation: strikethrough 0.4s ease-in-out forwards;
+}
+
+/* Checkbox styling */
+.custom-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #CBD5E0;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.custom-checkbox:checked {
+  background: #38B2AC;
+  border-color: #38B2AC;
+  animation: bounce-subtle 0.2s ease-out;
+}
+
+.custom-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  animation: checkmark 0.3s ease-out forwards;
+}
+
+.custom-checkbox:hover {
+  border-color: #38B2AC;
+  transform: scale(1.05);
+}
+
+/* Focus styles */
+.custom-checkbox:focus {
+  outline: 2px solid #38B2AC;
+  outline-offset: 2px;
+}
+
+/* Button animations */
+.btn-primary {
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(44, 122, 123, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  animation: bounce-subtle 0.1s ease-out;
+}
+
+/* Card hover effects */
+.task-card {
+  transition: all 0.2s ease;
+}
+
+.task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Empty state animation */
+.empty-state {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form input focus */
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #38B2AC;
+  box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.2);
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+}
