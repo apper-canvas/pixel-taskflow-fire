@@ -29,10 +29,10 @@ const loadTasks = async () => {
       setLoading(true);
       setError("");
       const fetchedTasks = await taskService.getAll();
-      // Sort tasks: incomplete first, then completed, with newest first within each group
+// Sort tasks: incomplete first, then completed, with newest first within each group
 // No longer sort here - sorting is handled by parent component
       setTasks(fetchedTasks);
-      onTasksChange?.(sortedTasks);
+      onTasksChange?.(fetchedTasks);
     } catch (err) {
       setError("Failed to load tasks. Please try again.");
       console.error("Error loading tasks:", err);
@@ -53,9 +53,8 @@ const loadTasks = async () => {
           task.id === taskId ? updatedTask : task
 );
 // No longer sort here - sorting is handled by parent component
-        const sortedTasks = newTasks;
-        onTasksChange?.(sortedTasks);
-        return sortedTasks;
+        onTasksChange?.(newTasks);
+        return newTasks;
       });
     } catch (err) {
       throw err;
