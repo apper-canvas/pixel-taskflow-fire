@@ -1,18 +1,19 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { taskService } from "@/services/api/taskService";
+import ApperIcon from "@/components/ApperIcon";
 import TaskItem from "@/components/molecules/TaskItem";
-import Loading from "@/components/ui/Loading";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
+import Loading from "@/components/ui/Loading";
 import { cn } from "@/utils/cn";
 
-const TaskList = ({ refreshTrigger, onTasksChange, className, ...props }) => {
+const TaskList = ({ refreshTrigger, onTasksChange, filteredTasks, activeStatusFilter, activePriorityFilter, className, ...props }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadTasks = async () => {
+const loadTasks = async () => {
     try {
       setLoading(true);
       setError("");
@@ -44,7 +45,7 @@ const TaskList = ({ refreshTrigger, onTasksChange, className, ...props }) => {
       setTasks(prevTasks => {
         const newTasks = prevTasks.map(task => 
           task.id === taskId ? updatedTask : task
-        );
+);
         // Re-sort after toggle
         const sortedTasks = newTasks.sort((a, b) => {
           if (a.completed !== b.completed) {
@@ -62,7 +63,7 @@ const TaskList = ({ refreshTrigger, onTasksChange, className, ...props }) => {
 
 const handleUpdateTask = async (taskId, updateData) => {
     try {
-      const updatedTask = await taskService.update(taskId, updateData);
+const updatedTask = await taskService.update(taskId, updateData);
       setTasks(prevTasks => {
         const newTasks = prevTasks.map(task => 
           task.id === taskId ? updatedTask : task
@@ -79,7 +80,7 @@ const handleUpdateTask = async (taskId, updateData) => {
   const handleDeleteTask = async (taskId) => {
     try {
       await taskService.delete(taskId);
-      setTasks(prevTasks => {
+setTasks(prevTasks => {
         const newTasks = prevTasks.filter(task => task.id !== taskId);
         onTasksChange?.(newTasks);
         return newTasks;
@@ -115,18 +116,52 @@ const handleUpdateTask = async (taskId, updateData) => {
       />
     );
   }
+// Use filtered tasks when available, otherwise use all tasks
+  const displayTasks = filteredTasks || tasks;
+
+  if (displayTasks.length === 0) {
+    const isFiltered = activeStatusFilter !== "all" || activePriorityFilter !== "all";
+    return (
+      <div className="bg-white rounded-2xl p-8 shadow-subtle border border-gray-100">
+        <div className="text-center">
+          <ApperIcon name={isFiltered ? "Filter" : "CheckCircle"} className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            {isFiltered ? "No tasks match your filters" : "No tasks yet"}
+          </h3>
+          <p className="text-gray-500">
+            {isFiltered 
+              ? "Try adjusting your filter criteria to see more tasks." 
+              : "Create your first task to get started with your productivity journey!"
+            }
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={cn("space-y-4 task-list", className)} {...props}>
-{tasks.map((task) => (
-        <TaskItem
-          key={task.id}
-          task={task}
-          onToggleComplete={handleToggleComplete}
-          onDelete={handleDeleteTask}
-          onUpdate={handleUpdateTask}
-        />
-      ))}
+    <div className={cn("bg-white rounded-2xl p-6 shadow-subtle border border-gray-100", className)} {...props}>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-semibold text-gray-900">
+          Tasks
+          {(activeStatusFilter !== "all" || activePriorityFilter !== "all") && (
+            <span className="ml-2 text-sm font-normal text-gray-500">
+              ({displayTasks.length} filtered)
+            </span>
+          )}
+        </h2>
+      </div>
+      <div className="space-y-4 max-h-96 overflow-y-auto task-list">
+        {displayTasks.map((task) => (
+          <TaskItem
+            key={task.id}
+            task={task}
+            onToggle={handleToggleComplete}
+            onUpdate={handleUpdateTask}
+            onDelete={handleDeleteTask}
+          />
+        ))}
+      </div>
     </div>
   );
 };

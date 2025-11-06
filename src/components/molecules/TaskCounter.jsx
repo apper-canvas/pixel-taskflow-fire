@@ -1,11 +1,31 @@
 import ApperIcon from "@/components/ApperIcon";
 import { cn } from "@/utils/cn";
 
-const TaskCounter = ({ tasks = [], className, ...props }) => {
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(task => task.completed).length;
+const TaskCounter = ({ tasks = [], filteredTasks = null, activeStatusFilter = "all", activePriorityFilter = "all", className, ...props }) => {
+  // Use filtered tasks for display counts when filters are active, otherwise use all tasks
+  const displayTasks = filteredTasks || tasks;
+  const isFiltered = activeStatusFilter !== "all" || activePriorityFilter !== "all";
+  
+  const totalTasks = displayTasks.length;
+  const completedTasks = displayTasks.filter(task => task.completed).length;
   const activeTasks = totalTasks - completedTasks;
   const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  // Calculate additional filtered metrics
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const dueTodayTasks = displayTasks.filter(task => {
+    const taskDueDate = task.dueDate ? new Date(task.dueDate) : null;
+    return taskDueDate && taskDueDate.getTime() === today.getTime() && !task.completed;
+  }).length;
+  
+  const overdueTasks = displayTasks.filter(task => {
+    const taskDueDate = task.dueDate ? new Date(task.dueDate) : null;
+    return taskDueDate && taskDueDate < today && !task.completed;
+  }).length;
+
+  const highPriorityTasks = displayTasks.filter(task => task.priority === "high" && !task.completed).length;
 
   return (
     <div className={cn("bg-white rounded-2xl p-6 shadow-subtle border border-gray-100", className)} {...props}>

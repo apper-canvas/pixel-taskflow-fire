@@ -2,12 +2,15 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { taskService } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
+import Button from "@/components/atoms/Button";
 import TaskForm from "@/components/molecules/TaskForm";
 import TaskCounter from "@/components/molecules/TaskCounter";
 import TaskList from "@/components/organisms/TaskList";
 
 const TaskManager = () => {
-  const [tasks, setTasks] = useState([]);
+const [tasks, setTasks] = useState([]);
+  const [activeStatusFilter, setActiveStatusFilter] = useState("all");
+  const [activePriorityFilter, setActivePriorityFilter] = useState("all");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleTaskCreated = async (taskData) => {
@@ -21,7 +24,50 @@ const TaskManager = () => {
   };
 
   const handleTasksChange = (updatedTasks) => {
-    setTasks(updatedTasks);
+setTasks(updatedTasks);
+  };
+
+  const getFilteredTasks = () => {
+    return tasks.filter(task => {
+      // Status filter
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const taskDueDate = task.dueDate ? new Date(task.dueDate) : null;
+      
+      let statusMatch = true;
+      switch (activeStatusFilter) {
+        case "active":
+          statusMatch = !task.completed;
+          break;
+        case "completed":
+          statusMatch = task.completed;
+          break;
+        case "due-today":
+          statusMatch = taskDueDate && taskDueDate.getTime() === today.getTime() && !task.completed;
+          break;
+        case "overdue":
+          statusMatch = taskDueDate && taskDueDate < today && !task.completed;
+          break;
+        default: // "all"
+          statusMatch = true;
+      }
+
+      // Priority filter
+      let priorityMatch = true;
+      if (activePriorityFilter !== "all") {
+        priorityMatch = task.priority === activePriorityFilter;
+      }
+
+      return statusMatch && priorityMatch;
+    });
+  };
+
+  const handleStatusFilterChange = (filter) => {
+    setActiveStatusFilter(filter);
+  };
+
+  const handlePriorityFilterChange = (filter) => {
+    setActivePriorityFilter(filter);
   };
 
   return (
@@ -55,7 +101,112 @@ const TaskManager = () => {
 
         {/* Task Counter */}
         <div className="mb-8">
-          <TaskCounter tasks={tasks} />
+<TaskCounter 
+            tasks={tasks} 
+            filteredTasks={getFilteredTasks()}
+            activeStatusFilter={activeStatusFilter}
+            activePriorityFilter={activePriorityFilter}
+          />
+        </div>
+
+        {/* Filter Section */}
+        <div className="bg-white rounded-2xl p-6 shadow-subtle border border-gray-100 mb-6">
+          <div className="space-y-6">
+            {/* Status Filters */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Filter by Status</h3>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={activeStatusFilter === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleStatusFilterChange("all")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="List" size={16} />
+                  All Tasks
+                </Button>
+                <Button
+                  variant={activeStatusFilter === "active" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleStatusFilterChange("active")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="Clock" size={16} />
+                  Active
+                </Button>
+                <Button
+                  variant={activeStatusFilter === "completed" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleStatusFilterChange("completed")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="CheckCircle" size={16} />
+                  Completed
+                </Button>
+                <Button
+                  variant={activeStatusFilter === "due-today" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleStatusFilterChange("due-today")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="Calendar" size={16} />
+                  Due Today
+                </Button>
+                <Button
+                  variant={activeStatusFilter === "overdue" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleStatusFilterChange("overdue")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="AlertTriangle" size={16} />
+                  Overdue
+                </Button>
+              </div>
+            </div>
+
+            {/* Priority Filters */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Filter by Priority</h3>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={activePriorityFilter === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePriorityFilterChange("all")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="Filter" size={16} />
+                  All Priorities
+                </Button>
+                <Button
+                  variant={activePriorityFilter === "high" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePriorityFilterChange("high")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="AlertCircle" size={16} />
+                  High Priority
+                </Button>
+                <Button
+                  variant={activePriorityFilter === "medium" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePriorityFilterChange("medium")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="Minus" size={16} />
+                  Medium Priority
+                </Button>
+                <Button
+                  variant={activePriorityFilter === "low" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePriorityFilterChange("low")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="ChevronDown" size={16} />
+                  Low Priority
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Task List */}
@@ -74,9 +225,12 @@ const TaskManager = () => {
             )}
           </div>
           
-          <TaskList
+<TaskList
             refreshTrigger={refreshTrigger}
             onTasksChange={handleTasksChange}
+            filteredTasks={getFilteredTasks()}
+            activeStatusFilter={activeStatusFilter}
+            activePriorityFilter={activePriorityFilter}
           />
         </div>
 
