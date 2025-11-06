@@ -314,10 +314,52 @@ const handleStatusFilterChange = (filter) => {
                   <ApperIcon name="ChevronDown" size={16} />
                   Low Priority
                 </Button>
+</div>
+            </div>
+
+            {/* Sort Options */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Sort Tasks</h3>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={sortBy === "dueDate" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleSortChange("dueDate")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="Calendar" size={16} />
+                  Due Date
+                </Button>
+                <Button
+                  variant={sortBy === "priority" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleSortChange("priority")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="AlertCircle" size={16} />
+                  Priority
+                </Button>
+                <Button
+                  variant={sortBy === "createdAt" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleSortChange("createdAt")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="Clock" size={16} />
+                  Created Date
+                </Button>
+                <Button
+                  variant={sortBy === "alphabetical" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleSortChange("alphabetical")}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="AlphabeticalOrder" size={16} />
+                  Alphabetical
+                </Button>
               </div>
             </div>
-</div>
-
+          </div>
           {/* Sort Dropdown */}
           <div className="relative">
             <Button
