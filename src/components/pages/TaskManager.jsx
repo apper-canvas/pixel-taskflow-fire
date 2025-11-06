@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { taskService } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
 import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
 import TaskForm from "@/components/molecules/TaskForm";
 import TaskCounter from "@/components/molecules/TaskCounter";
 import TaskList from "@/components/organisms/TaskList";
@@ -11,7 +12,18 @@ const TaskManager = () => {
 const [tasks, setTasks] = useState([]);
   const [activeStatusFilter, setActiveStatusFilter] = useState("all");
   const [activePriorityFilter, setActivePriorityFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Debounce search query for performance
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleTaskCreated = async (taskData) => {
     try {
@@ -28,7 +40,7 @@ setTasks(updatedTasks);
   };
 
   const getFilteredTasks = () => {
-    return tasks.filter(task => {
+return tasks.filter(task => {
       // Status filter
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -58,7 +70,17 @@ setTasks(updatedTasks);
         priorityMatch = task.priority === activePriorityFilter;
       }
 
-      return statusMatch && priorityMatch;
+      // Search filter
+      let searchMatch = true;
+      if (debouncedSearchQuery.trim()) {
+        const query = debouncedSearchQuery.toLowerCase();
+        searchMatch = 
+          task.title.toLowerCase().includes(query) ||
+          task.description.toLowerCase().includes(query) ||
+          task.category.toLowerCase().includes(query);
+      }
+
+      return statusMatch && priorityMatch && searchMatch;
     });
   };
 
@@ -109,9 +131,39 @@ setTasks(updatedTasks);
           />
         </div>
 
-        {/* Filter Section */}
+{/* Filter Section */}
         <div className="bg-white rounded-2xl p-6 shadow-subtle border border-gray-100 mb-6">
           <div className="space-y-6">
+            {/* Search Bar */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Search Tasks</h3>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <ApperIcon name="Search" className="h-4 w-4 text-gray-400" />
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Search by title, description, or category..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-10"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  >
+                    <ApperIcon name="X" className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                  </button>
+                )}
+              </div>
+              {debouncedSearchQuery && (
+                <p className="mt-2 text-xs text-gray-500">
+                  Searching for "{debouncedSearchQuery}"
+                </p>
+              )}
+            </div>
+
             {/* Status Filters */}
             <div>
               <h3 className="text-sm font-medium text-gray-700 mb-3">Filter by Status</h3>
@@ -231,6 +283,7 @@ setTasks(updatedTasks);
             filteredTasks={getFilteredTasks()}
             activeStatusFilter={activeStatusFilter}
             activePriorityFilter={activePriorityFilter}
+            searchQuery={debouncedSearchQuery}
           />
         </div>
 

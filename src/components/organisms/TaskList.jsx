@@ -8,7 +8,7 @@ import Empty from "@/components/ui/Empty";
 import Loading from "@/components/ui/Loading";
 import { cn } from "@/utils/cn";
 
-const TaskList = ({ refreshTrigger, onTasksChange, filteredTasks, activeStatusFilter, activePriorityFilter, className, ...props }) => {
+const TaskList = ({ refreshTrigger, onTasksChange, filteredTasks, activeStatusFilter, activePriorityFilter, searchQuery, className, ...props }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -119,19 +119,28 @@ setTasks(prevTasks => {
 // Use filtered tasks when available, otherwise use all tasks
   const displayTasks = filteredTasks || tasks;
 
-  if (displayTasks.length === 0) {
-    const isFiltered = activeStatusFilter !== "all" || activePriorityFilter !== "all";
+if (displayTasks.length === 0) {
+    const isFiltered = activeStatusFilter !== "all" || activePriorityFilter !== "all" || (searchQuery && searchQuery.trim());
+    const hasSearchQuery = searchQuery && searchQuery.trim();
+    
     return (
       <div className="bg-white rounded-2xl p-8 shadow-subtle border border-gray-100">
         <div className="text-center">
-          <ApperIcon name={isFiltered ? "Filter" : "CheckCircle"} className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <ApperIcon name={isFiltered ? "Search" : "CheckCircle"} className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {isFiltered ? "No tasks match your filters" : "No tasks yet"}
+            {hasSearchQuery 
+              ? `No tasks match "${searchQuery}"`
+              : isFiltered 
+                ? "No tasks match your filters" 
+                : "No tasks yet"
+            }
           </h3>
           <p className="text-gray-500">
-            {isFiltered 
-              ? "Try adjusting your filter criteria to see more tasks." 
-              : "Create your first task to get started with your productivity journey!"
+            {hasSearchQuery
+              ? "Try searching with different keywords or check your spelling."
+              : isFiltered 
+                ? "Try adjusting your filter criteria to see more tasks." 
+                : "Create your first task to get started with your productivity journey!"
             }
           </p>
         </div>
@@ -144,9 +153,9 @@ setTasks(prevTasks => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-900">
           Tasks
-          {(activeStatusFilter !== "all" || activePriorityFilter !== "all") && (
+{(activeStatusFilter !== "all" || activePriorityFilter !== "all" || (searchQuery && searchQuery.trim())) && (
             <span className="ml-2 text-sm font-normal text-gray-500">
-              ({displayTasks.length} filtered)
+              ({displayTasks.length} {searchQuery && searchQuery.trim() ? 'matching' : 'filtered'})
             </span>
           )}
         </h2>
